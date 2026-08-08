@@ -1,0 +1,181 @@
+---
+title: Lambda vs Kappa
+sidebar_label: Lambda vs Kappa
+description: Two ways to organise a data platform around streaming — what each actually costs, and what most companies really run.
+---
+
+# Lambda vs Kappa
+
+<PageMeta level="advanced" time="8 min" prereq={[['Batch vs streaming', '/docs/flink/foundations/batch-vs-streaming']]} />
+
+<Objectives>
+
+- Describe both architectures and the problem each was invented to solve
+- Explain why Lambda fell out of favour, specifically
+- Recognise the hybrid that most companies actually run, and why that is fine
+
+</Objectives>
+
+## Lambda
+
+Two parallel paths over the same data: a fast, approximate one and a slow, correct one.
+
+```mermaid
+flowchart LR
+    S[(Event log)] --> B[Batch layer<br/>reprocess everything nightly]
+    S --> SP[Speed layer<br/>streaming, approximate]
+    B --> BV[(Batch views<br/>authoritative)]
+    SP --> RV[(Real-time views<br/>recent only)]
+    BV --> Q[Serving layer<br/>merge both]
+    RV --> Q
+    Q --> U[Query]
+```
+
+The argument in 2012 was sound: streaming systems of the day could not give you
+correctness, so you used them for freshness and let a nightly batch job produce the
+truth. The serving layer merged "everything up to last night" with "since last night".
+
+### Why it fell out of favour
+
+Not because the idea was wrong, but because of one practical cost that never went away:
+
+<Callout type="key">
+
+**You write every piece of business logic twice**, in two systems, with two sets of
+semantics — and the numbers never quite agree.
+
+Then you spend a meaningful fraction of your team's time reconciling them. Every new
+metric doubles that work. Every bug fix has to be applied in two places and verified
+against two engines that round, order and handle nulls differently.
+
+</Callout>
+
+Secondary costs: two systems to operate, two on-call rotations, two skill sets, and a
+serving layer whose merge logic is itself a source of subtle bugs at the boundary.
+
+## Kappa
+
+One path. Streaming only. Reprocessing means replaying the log through the same code.
+
+```mermaid
+flowchart LR
+    S[(Event log<br/>long retention)] --> F[Stream processing<br/>ONE codebase]
+    F --> V[(Views)]
+    V --> Q[Query]
+    S -.->|replay from offset 0<br/>into a NEW job| F2[Stream processing v2]
+    F2 -.-> V2[(New views)]
+    V2 -.->|swap when caught up| Q
+```
+
+The insight: if your stream processor is correct and your log is durable, "batch" is
+just "streaming over old data". You do not need a second system — you need a second
+*run*.
+
+### What Kappa requires to be real
+
+It is not free. It works only if all of these hold:
+
+| Requirement | Why |
+| --- | --- |
+| **Long log retention** | To reprocess a year, you need a year of log. Tiered storage makes this affordable. |
+| **Event-time correctness** | A replay must produce the same result as the live run. This is [Level 2](/docs/flink/time/three-clocks) and it is non-negotiable. |
+| **Bounded backfill resources** | Replaying a year in an hour is a very different resource profile from live traffic. [Watermark alignment](/docs/flink/watermarks/propagation-and-idleness) is essential here. |
+| **Versioned, swappable outputs** | You run v2 alongside v1 and cut over when it catches up. |
+| **Deterministic logic** | Same as [exactly-once requirement 3](/docs/flink/fault-tolerance/exactly-once). |
+
+<Callout type="mistake">
+
+Adopting Kappa while using processing-time windows.
+
+A replay then produces completely different results from the live run, so the whole
+premise — reprocessing yields the same answer — is false. You have one codebase and two
+sets of numbers, which is worse than Lambda.
+
+Kappa is downstream of event-time correctness. Get that right first.
+
+</Callout>
+
+## What most companies actually run
+
+Neither, exactly. The common shape in 2026:
+
+```mermaid
+flowchart LR
+    K[(Kafka<br/>7-30 day retention)] --> F["Flink<br/>streaming ingest + light transform"]
+    F --> L[(Lakehouse table<br/>Iceberg / Delta / Paimon)]
+    F --> RT[(Serving store<br/>low-latency views)]
+    L --> BQ["Batch / ad-hoc SQL<br/>Trino, Spark, Athena"]
+    L -.->|backfill: read the table,<br/>not the log| F2["Flink, BATCH mode<br/>SAME code"]
+    F2 -.-> L
+```
+
+Streaming for **ingestion and low-latency views**; the lakehouse table as the durable,
+queryable history; batch engines for ad-hoc analysis; and backfills run as the *same
+Flink code in `BATCH` mode* over the table rather than over the Kafka log.
+
+<Callout type="prod" title="Why this hybrid wins in practice">
+
+It takes the good part of Kappa — **one codebase**, because Flink's unified API runs the
+same job in streaming and batch mode — without requiring years of Kafka retention.
+
+The lakehouse table becomes the replay source. That is cheaper than a very long Kafka
+retention, it is directly queryable by everyone else in the company, and it gives you
+time travel for free.
+
+This is exactly the architecture [StreamForge](/docs/intro) packages: Kafka in, Flink
+compiles the pipeline, query-ready Parquet lands in S3, and the catalog is kept in sync
+so the data is immediately queryable.
+
+</Callout>
+
+## Choosing
+
+| Situation | Architecture |
+| --- | --- |
+| Greenfield, event-time correct, moderate history | **Kappa** — one system, replay from the log |
+| Existing large batch estate, streaming being added | **Hybrid** — stream ingest, batch analysis, unified backfill |
+| Years of history, expensive to retain in Kafka | **Hybrid** — lakehouse table as the replay source |
+| Regulatory requirement for an independently computed reconciliation | **Lambda-ish** — deliberately, and accept the double implementation |
+| Latency requirement of minutes, no streaming skills on the team | Batch. Do not build any of this. |
+
+That last row is real advice. The cheapest streaming architecture is the one you did not
+need to build.
+
+<Expert>
+
+**Reprocessing is the real design constraint.** Whichever label you pick, the question
+that determines your architecture is: *"When we find a bug in a metric, how do we
+recompute the last six months?"*
+
+If the answer involves writing new code in a different system, you have Lambda's cost
+whether or not you have its diagram.
+
+**Backfill throughput is not live throughput.** A backfill reads as fast as storage
+allows, which can be 50× live rate. That changes everything: watermarks race, state
+explodes, TTL does not expire (it is processing-time based), and sinks get hammered.
+Plan backfills as a separate operational mode with their own resource profile and
+alignment settings.
+
+**Blue/green output tables.** The clean cutover pattern: v2 writes to
+`metrics_v2`, you compare it against `metrics_v1` over an overlap window, then swap a
+view or alias. This makes reprocessing a routine operation rather than an event, which
+is the actual goal of all of this.
+
+**Streaming lakehouse formats change the calculus.** Iceberg, Delta and Paimon accept
+streaming upserts and deletes *and* serve batch queries. That is what made the hybrid
+practical — before them, streaming into a queryable table meant either small-file chaos
+or a separate serving database.
+
+</Expert>
+
+<Callout type="remember">
+
+Lambda's cost is writing everything twice. Kappa's requirement is event-time correctness
+plus enough retention. Most companies run the hybrid — stream in, lakehouse as history,
+one codebase, backfills in batch mode.
+
+</Callout>
+
+## Next
+
+**[Reference architectures](/docs/flink/architecture/patterns)** — six concrete designs.

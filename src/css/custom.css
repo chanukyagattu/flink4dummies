@@ -1,0 +1,3 @@
+/* Site-wide styles. The Flink for Dummies theme is imported last so it wins
+   on specificity ties with Infima defaults. */
+@import './flink-theme.css';

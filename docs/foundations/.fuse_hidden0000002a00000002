@@ -1,0 +1,176 @@
+---
+title: Batch vs streaming
+sidebar_label: Batch vs streaming
+description: Batch is a special case of streaming, not the opposite of it — and the practical consequences of taking that seriously.
+---
+
+# Batch vs streaming
+
+<PageMeta level="beginner" time="7 min" prereq={[['What is a stream?', '/docs/flink/foundations/what-is-a-stream']]} />
+
+<Objectives>
+
+- Explain why "batch is a bounded stream" is a design claim, not a slogan
+- Say what actually changes in the runtime between the two modes
+- Decide, for a given requirement, whether streaming is worth the complexity
+
+</Objectives>
+
+## The usual framing, and why it is wrong
+
+People describe these as two philosophies:
+
+> Batch processes data at rest. Streaming processes data in motion.
+
+That is true and not very useful. Here is the framing that changes how you build
+things:
+
+<Callout type="key">
+
+**Batch is streaming over a stream that happens to end.**
+
+A nightly job over yesterday's file is the same computation as a streaming job —
+you just happen to know where the data stops, so you can be lazier about time,
+lateness, and failure.
+
+</Callout>
+
+Flink takes this literally. The same `DataStream` program runs in either mode:
+
+```java
+// identical business logic; only the execution mode differs
+env.setRuntimeMode(RuntimeExecutionMode.STREAMING);  // unbounded source
+env.setRuntimeMode(RuntimeExecutionMode.BATCH);      // bounded source
+```
+
+## What actually changes underneath
+
+This is the part worth memorising, because it explains a lot of otherwise
+mysterious behaviour.
+
+| | `STREAMING` | `BATCH` |
+| --- | --- | --- |
+| **Shuffles** | Pipelined — downstream starts before upstream finishes | Blocking — a stage completes, spills to disk, then the next starts |
+| **State** | Kept live, checkpointed | Kept per key, discarded when the key is done |
+| **Checkpointing** | On, periodic | Off — recovery is "re-run the failed stage from its spilled output" |
+| **Watermarks** | Real, continuously advancing | One watermark at `+∞` at the end |
+| **Result emission** | Continuous, possibly updated | Once, at the end |
+| **Ordering into operators** | Whatever arrives | Sorted by key, so all records for a key arrive together |
+| **Failure cost** | Restore from last checkpoint | Re-run one stage |
+
+That "sorted by key" row is why batch mode needs far less memory: it processes
+one key completely, emits, drops the state, moves on. Streaming mode cannot do
+that, because a key is never "done".
+
+```mermaid
+flowchart TB
+    subgraph B["BATCH — stages run to completion"]
+      direction LR
+      B1[Stage 1] -->|spill to disk| B2[Stage 2] -->|spill| B3[Stage 3]
+    end
+    subgraph S["STREAMING — everything runs at once"]
+      direction LR
+      S1[Source] --> S2[Operator] --> S3[Sink]
+      S3 -.->|backpressure| S2 -.->|backpressure| S1
+    end
+```
+
+## Real-world analogy
+
+**Batch** is doing your laundry: gather everything, run the machine, get clean
+clothes. Efficient per item, but nothing is clean until the whole load finishes.
+
+**Streaming** is a dishwasher plumbed directly to the sink that washes each plate
+as you hand it over. Higher machinery cost, more things that can go wrong, but
+you never wait for a load.
+
+The dishwasher also has a problem the laundry does not: it must decide what to do
+when you hand it a plate from *yesterday's* dinner. That is lateness, and it is
+the tax you pay for continuous results.
+
+## When is streaming actually worth it?
+
+Streaming is strictly more machinery. Use it when the answer's *value decays with
+age*.
+
+| Requirement | Verdict |
+| --- | --- |
+| Fraud decision before the payment completes | Streaming. A nightly answer is worthless. |
+| Alert when a sensor exceeds threshold | Streaming. |
+| Feed a live dashboard | Streaming, usually. |
+| Keep a search index fresh | Streaming. |
+| Land raw events into a lake for analysts | Streaming *ingestion*, batch analysis. This is what [StreamForge](/docs/intro) does. |
+| Monthly financial close | Batch. Correctness beats latency; the data is not final anyway. |
+| Retrain a model on two years of history | Batch. |
+| Backfill a new metric over historical data | Batch mode of the *same* streaming job — this is the big win of a unified API. |
+
+<Callout type="prod" title="The backfill argument">
+
+The strongest practical reason to use one engine for both: when you add a new
+metric, you want to compute it over the last 18 months *and* going forward, and
+you want both numbers to agree.
+
+With separate batch and streaming systems you write the logic twice, in two
+languages, and the numbers never quite match. This mismatch — reconciling a batch
+"truth" table with a streaming "fast" table — is the maintenance cost that made
+the **Lambda architecture** fall out of favour.
+
+With one engine you write it once and run it in two modes. That is the **Kappa**
+argument, and it is the main reason Flink's unified API exists.
+
+</Callout>
+
+## Micro-batching: the third thing
+
+You will hear "but Spark Structured Streaming does streaming too". It does, via a
+different mechanism worth understanding.
+
+```text
+Micro-batch:   [ 200ms of data ] → job → [ 200ms of data ] → job → …
+True streaming: event → operator → event → operator → …
+```
+
+Micro-batching runs a tiny batch job every N milliseconds. That is a legitimate
+design with real advantages (simple recovery, high throughput per core). The
+trade-offs:
+
+- **Latency floor** — you cannot go below the batch interval, plus scheduling overhead
+- **Per-event state and timers are awkward** — "alert if no heartbeat for 30 seconds, per device" fits an event-at-a-time model far more naturally
+- **Windows must align to batch boundaries** or be reconciled across them
+
+Flink is event-at-a-time: a record enters an operator, is processed, and leaves.
+That is why sub-100ms end-to-end latency and per-key timers are natural in Flink
+and fiddly elsewhere.
+
+<Callout type="hood">
+
+"Event-at-a-time" does not mean "one record per network packet". Flink buffers
+records into network buffers for throughput and flushes them on a timer
+(`execution.buffer-timeout`, default 100ms). Set it to 0 for lowest latency at
+the cost of throughput; raise it for the opposite. The *processing model* is
+still one record at a time — only the *transport* is batched.
+
+</Callout>
+
+<Callout type="mistake">
+
+Choosing streaming because it sounds more advanced. Streaming adds state
+management, watermarks, checkpoint tuning, savepoint-based upgrades, and a class
+of bugs that only appear under load.
+
+If a 15-minute-old answer is fine, a cron job and a SQL query will outlive your
+streaming pipeline and page you less. Adopt streaming when latency is a
+*requirement*, not an aesthetic.
+
+</Callout>
+
+<Callout type="remember">
+
+Batch is a bounded stream. Streaming costs more machinery and buys you answers
+whose value would otherwise decay. Pay it only when the decay is real.
+
+</Callout>
+
+## Next
+
+**[Why this is hard](/docs/flink/foundations/why-this-is-hard)** — the four problems that make streaming genuinely difficult.

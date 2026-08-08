@@ -1,0 +1,522 @@
+/* =========================================================================
+   StreamForge — Flink Bible theme
+   Calm · Technical · Premium · Readable
+   Charcoal surfaces, muted blue accent, sage for "healthy/correct",
+   off-white text. No pure black, no pure white, no neon.
+   Import this AFTER Infima in website/src/css/custom.css:
+       @import './flink-theme.css';
+   ========================================================================= */
+
+:root {
+  /* --- surfaces (light mode: warm paper, not glaring white) --- */
+  --fb-bg:            #FAF8F3;
+  --fb-surface:       #FFFFFF;
+  --fb-surface-2:     #F1EDE4;
+  --fb-border:        #DDD6C7;
+
+  /* --- text --- */
+  --fb-text:          #24262A;
+  --fb-text-dim:      #5C6068;
+
+  /* --- accents --- */
+  --fb-blue:          #3E6E9E;   /* muted, never neon */
+  --fb-blue-soft:     #E4EDF5;
+  --fb-sage:          #4F7A55;
+  --fb-sage-soft:     #E6EFE6;
+  --fb-amber:         #9A6B24;
+  --fb-amber-soft:    #F6EEDE;
+  --fb-rose:          #9C4B4B;
+  --fb-rose-soft:     #F6E7E7;
+  --fb-violet:        #6B5B95;
+  --fb-violet-soft:   #EDE9F3;
+
+  /* --- typography --- */
+  --fb-font-body: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                  'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --fb-font-mono: ui-monospace, 'SFMono-Regular', 'JetBrains Mono',
+                  'Cascadia Code', Menlo, Consolas, monospace;
+  --fb-radius: 10px;
+
+  /* --- Infima overrides --- */
+  --ifm-color-primary:         #3E6E9E;
+  --ifm-color-primary-dark:    #38638E;
+  --ifm-color-primary-darker:  #345D86;
+  --ifm-color-primary-darkest: #2B4C6E;
+  --ifm-color-primary-light:   #4C7CAC;
+  --ifm-color-primary-lighter: #5484B4;
+  --ifm-color-primary-lightest: #6E9AC4;
+
+  --ifm-font-family-base: var(--fb-font-body);
+  --ifm-font-family-monospace: var(--fb-font-mono);
+
+  /* Readability: generous rhythm, comfortable measure */
+  --ifm-line-height-base: 1.75;
+  --ifm-paragraph-margin-bottom: 1.15rem;
+  --ifm-h1-font-size: 2.45rem;
+  --ifm-h2-font-size: 1.72rem;
+  --ifm-h3-font-size: 1.28rem;
+  --ifm-heading-font-weight: 650;
+  --ifm-code-font-size: 88%;
+  --ifm-code-border-radius: 6px;
+  --ifm-pre-padding: 1.05rem 1.15rem;
+  --ifm-alert-border-radius: var(--fb-radius);
+  --ifm-alert-border-left-width: 3px;
+  --ifm-table-border-color: var(--fb-border);
+  --ifm-toc-border-color: var(--fb-border);
+  --ifm-blockquote-color: var(--fb-text-dim);
+  --ifm-blockquote-border-color: var(--fb-blue);
+  --docusaurus-highlighted-code-line-bg: rgba(62, 110, 158, 0.14);
+}
+
+/* =========================================================================
+   DARK MODE — charcoal, never #000
+   ========================================================================= */
+[data-theme='dark'] {
+  --fb-bg:        #181A1B;   /* page */
+  --fb-surface:   #202225;   /* cards */
+  --fb-surface-2: #242629;   /* code, nested */
+  --fb-surface-3: #292C30;   /* hover / raised */
+  --fb-border:    #34383D;
+
+  --fb-text:      #F2EFE6;   /* off-white / cream, not #FFF */
+  --fb-text-dim:  #A8ABB0;
+
+  --fb-blue:        #7FA9D4;
+  --fb-blue-soft:   #1E2A36;
+  --fb-sage:        #8FB894;
+  --fb-sage-soft:   #1D2620;
+  --fb-amber:       #D6AE72;
+  --fb-amber-soft:  #2A2419;
+  --fb-rose:        #D89494;
+  --fb-rose-soft:   #2B1E1E;
+  --fb-violet:      #A99BC7;
+  --fb-violet-soft: #23202B;
+
+  --ifm-color-primary:          #7FA9D4;
+  --ifm-color-primary-dark:     #6698CB;
+  --ifm-color-primary-darker:   #5A8FC7;
+  --ifm-color-primary-darkest:  #3F76AF;
+  --ifm-color-primary-light:    #98BADD;
+  --ifm-color-primary-lighter:  #A4C3E1;
+  --ifm-color-primary-lightest: #C4D9EC;
+
+  --ifm-background-color:         var(--fb-bg);
+  --ifm-background-surface-color: var(--fb-surface);
+  --ifm-navbar-background-color:  #1C1E20;
+  --ifm-footer-background-color:  #1C1E20;
+  --ifm-font-color-base:          var(--fb-text);
+  --ifm-heading-color:            var(--fb-text);
+  --ifm-toc-border-color:         var(--fb-border);
+  --ifm-table-stripe-background:  rgba(255, 255, 255, 0.02);
+  --ifm-code-background:          var(--fb-surface-2);
+  --docusaurus-highlighted-code-line-bg: rgba(127, 169, 212, 0.16);
+}
+
+/* =========================================================================
+   Reading comfort
+   ========================================================================= */
+.markdown {
+  max-width: 82ch;              /* comfortable measure */
+}
+.markdown > h1 { letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+.markdown > h2 {
+  margin-top: 2.9rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--fb-border);
+  letter-spacing: -0.01em;
+}
+.markdown > h3 { margin-top: 2rem; }
+.markdown li { margin: 0.32rem 0; }
+
+/* Code blocks: quieter, softer than the page chrome */
+.theme-code-block {
+  border: 1px solid var(--fb-border);
+  border-radius: var(--fb-radius);
+  box-shadow: none !important;
+}
+[data-theme='dark'] .theme-code-block { background: var(--fb-surface-2) !important; }
+[data-theme='dark'] .theme-code-block pre { background: transparent !important; }
+code {
+  border: 1px solid var(--fb-border);
+  padding: 0.14rem 0.36rem;
+}
+
+/* Tables read as data, not decoration */
+.markdown table { display: table; width: 100%; font-size: 0.94rem; }
+.markdown table th {
+  background: var(--fb-surface-2);
+  font-weight: 640;
+  text-align: left;
+}
+.markdown table td, .markdown table th { vertical-align: top; }
+
+/* Mermaid sits on a card, centered, with breathing room */
+.docusaurus-mermaid-container, div[class*='mermaid'] {
+  background: var(--fb-surface);
+  border: 1px solid var(--fb-border);
+  border-radius: var(--fb-radius);
+  padding: 1.4rem 1rem;
+  margin: 1.7rem 0;
+  overflow-x: auto;
+}
+
+/* =========================================================================
+   Page header block (difficulty / time / prerequisites)
+   ========================================================================= */
+.fb-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  margin: 0 0 1.6rem;
+  background: var(--fb-surface);
+  border: 1px solid var(--fb-border);
+  border-radius: var(--fb-radius);
+  font-size: 0.86rem;
+}
+.fb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--fb-border);
+  background: var(--fb-surface-2);
+  color: var(--fb-text-dim);
+  white-space: nowrap;
+}
+.fb-chip--beginner     { color: var(--fb-sage);   border-color: var(--fb-sage);   background: var(--fb-sage-soft); }
+.fb-chip--intermediate { color: var(--fb-amber);  border-color: var(--fb-amber);  background: var(--fb-amber-soft); }
+.fb-chip--advanced     { color: var(--fb-rose);   border-color: var(--fb-rose);   background: var(--fb-rose-soft); }
+.fb-chip--expert       { color: var(--fb-violet); border-color: var(--fb-violet); background: var(--fb-violet-soft); }
+.fb-meta__prereq { color: var(--fb-text-dim); flex: 1 1 100%; }
+.fb-meta__prereq a { color: var(--fb-blue); }
+
+/* Learning objectives */
+.fb-objectives {
+  border-left: 3px solid var(--fb-blue);
+  background: var(--fb-blue-soft);
+  border-radius: 0 var(--fb-radius) var(--fb-radius) 0;
+  padding: 0.9rem 1.15rem;
+  margin: 1.4rem 0 1.8rem;
+}
+.fb-objectives__title {
+  font-weight: 660;
+  font-size: 0.8rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--fb-blue);
+  margin-bottom: 0.4rem;
+}
+.fb-objectives ul { margin: 0; padding-left: 1.15rem; }
+
+/* =========================================================================
+   Callouts — 💡 Mental Model, ⚠️ Common Mistake, 🔍 Under the Hood, …
+   ========================================================================= */
+.fb-callout {
+  display: block;
+  border: 1px solid var(--fb-border);
+  border-left: 3px solid var(--fb-blue);
+  background: var(--fb-surface);
+  border-radius: 0 var(--fb-radius) var(--fb-radius) 0;
+  padding: 0.95rem 1.15rem;
+  margin: 1.5rem 0;
+}
+.fb-callout__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 660;
+  font-size: 0.94rem;
+  margin-bottom: 0.45rem;
+}
+.fb-callout__icon { font-size: 1rem; line-height: 1; }
+.fb-callout > :last-child { margin-bottom: 0; }
+
+.fb-callout--mental  { border-left-color: var(--fb-blue);   background: var(--fb-blue-soft); }
+.fb-callout--mental .fb-callout__title { color: var(--fb-blue); }
+.fb-callout--mistake { border-left-color: var(--fb-rose);   background: var(--fb-rose-soft); }
+.fb-callout--mistake .fb-callout__title { color: var(--fb-rose); }
+.fb-callout--hood    { border-left-color: var(--fb-violet); background: var(--fb-violet-soft); }
+.fb-callout--hood .fb-callout__title { color: var(--fb-violet); }
+.fb-callout--prod    { border-left-color: var(--fb-sage);   background: var(--fb-sage-soft); }
+.fb-callout--prod .fb-callout__title { color: var(--fb-sage); }
+.fb-callout--remember{ border-left-color: var(--fb-amber);  background: var(--fb-amber-soft); }
+.fb-callout--remember .fb-callout__title { color: var(--fb-amber); }
+.fb-callout--try     { border-left-color: var(--fb-sage);   background: var(--fb-surface); }
+.fb-callout--try .fb-callout__title { color: var(--fb-sage); }
+.fb-callout--version { border-left-color: var(--fb-text-dim); background: var(--fb-surface-2); }
+.fb-callout--version .fb-callout__title { color: var(--fb-text-dim); }
+
+/* =========================================================================
+   Comparison cards ("X vs Y")
+   ========================================================================= */
+.fb-compare {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin: 1.6rem 0;
+}
+.fb-compare__card {
+  background: var(--fb-surface);
+  border: 1px solid var(--fb-border);
+  border-radius: var(--fb-radius);
+  padding: 1rem 1.1rem;
+}
+.fb-compare__card h4 {
+  margin: 0 0 0.55rem;
+  font-size: 1.02rem;
+  color: var(--fb-blue);
+}
+.fb-compare__card dl { margin: 0; font-size: 0.9rem; }
+.fb-compare__card dt {
+  font-size: 0.72rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--fb-text-dim);
+  margin-top: 0.6rem;
+}
+.fb-compare__card dd { margin: 0.15rem 0 0; }
+
+/* =========================================================================
+   Simulators (interactive widgets)
+   ========================================================================= */
+.fb-sim {
+  background: var(--fb-surface);
+  border: 1px solid var(--fb-border);
+  border-radius: var(--fb-radius);
+  padding: 1.1rem 1.2rem 1.25rem;
+  margin: 1.8rem 0;
+}
+.fb-sim__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.9rem;
+}
+.fb-sim__title { font-weight: 660; font-size: 1rem; }
+.fb-sim__hint { color: var(--fb-text-dim); font-size: 0.82rem; }
+.fb-sim__controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.85rem 1.2rem;
+  padding: 0.85rem 0 1rem;
+  border-bottom: 1px solid var(--fb-border);
+  margin-bottom: 1rem;
+}
+.fb-sim__control label {
+  display: block;
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--fb-text-dim);
+  margin-bottom: 0.3rem;
+}
+.fb-sim__control output {
+  font-family: var(--fb-font-mono);
+  color: var(--fb-blue);
+  font-size: 0.82rem;
+}
+.fb-sim input[type='range'] { width: 100%; accent-color: var(--fb-blue); }
+.fb-sim select, .fb-sim input[type='number'] {
+  width: 100%;
+  background: var(--fb-surface-2);
+  color: var(--fb-text);
+  border: 1px solid var(--fb-border);
+  border-radius: 6px;
+  padding: 0.35rem 0.5rem;
+  font-family: var(--fb-font-mono);
+  font-size: 0.85rem;
+}
+.fb-btn {
+  background: var(--fb-surface-2);
+  color: var(--fb-text);
+  border: 1px solid var(--fb-border);
+  border-radius: 6px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.fb-btn:hover  { background: var(--fb-surface-3, var(--fb-surface-2)); border-color: var(--fb-blue); }
+.fb-btn:focus-visible { outline: 2px solid var(--fb-blue); outline-offset: 2px; }
+.fb-btn--primary { background: var(--fb-blue-soft); border-color: var(--fb-blue); color: var(--fb-blue); }
+.fb-btn-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.9rem; }
+
+.fb-sim__stage { position: relative; overflow-x: auto; }
+.fb-sim svg { display: block; max-width: 100%; height: auto; }
+.fb-sim__log {
+  font-family: var(--fb-font-mono);
+  font-size: 0.78rem;
+  background: var(--fb-surface-2);
+  border: 1px solid var(--fb-border);
+  border-radius: 6px;
+  padding: 0.65rem 0.8rem;
+  margin-top: 0.9rem;
+  max-height: 160px;
+  overflow-y: auto;
+  line-height: 1.55;
+}
+.fb-sim__log b { color: var(--fb-blue); font-weight: 600; }
+.fb-sim__log .ok   { color: var(--fb-sage); }
+.fb-sim__log .warn { color: var(--fb-amber); }
+.fb-sim__log .bad  { color: var(--fb-rose); }
+
+.fb-legend {
+  display: flex; flex-wrap: wrap; gap: 0.4rem 1rem;
+  font-size: 0.78rem; color: var(--fb-text-dim); margin-top: 0.75rem;
+}
+.fb-legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+.fb-swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+/* =========================================================================
+   "Expert in 30 seconds" collapsible
+   ========================================================================= */
+.fb-expert {
+  border: 1px solid var(--fb-violet);
+  background: var(--fb-violet-soft);
+  border-radius: var(--fb-radius);
+  padding: 0.55rem 0.95rem;
+  margin: 1.5rem 0;
+}
+.fb-expert > summary {
+  cursor: pointer;
+  font-weight: 640;
+  color: var(--fb-violet);
+  list-style: none;
+  padding: 0.3rem 0;
+}
+.fb-expert > summary::-webkit-details-marker { display: none; }
+.fb-expert > summary::before { content: '⚫  '; }
+.fb-expert[open] > summary { border-bottom: 1px solid var(--fb-border); margin-bottom: 0.7rem; }
+.fb-expert > :last-child { margin-bottom: 0.4rem; }
+
+/* =========================================================================
+   Landing / roadmap grid
+   ========================================================================= */
+.fb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin: 1.6rem 0;
+}
+.fb-card {
+  display: block;
+  background: var(--fb-surface);
+  border: 1px solid var(--fb-border);
+  border-radius: var(--fb-radius);
+  padding: 1.1rem 1.2rem;
+  text-decoration: none !important;
+  color: inherit;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.fb-card:hover { border-color: var(--fb-blue); transform: translateY(-2px); }
+.fb-card__level {
+  font-size: 0.72rem; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--fb-text-dim); margin-bottom: 0.35rem;
+}
+.fb-card__title { font-weight: 660; font-size: 1.05rem; margin-bottom: 0.35rem; color: var(--fb-text); }
+.fb-card__desc  { font-size: 0.88rem; color: var(--fb-text-dim); line-height: 1.6; }
+
+/* =========================================================================
+   Accessibility
+   ========================================================================= */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+.fb-card:focus-visible {
+  outline: 2px solid var(--fb-blue);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .fb-card:hover { transform: none; }
+}
+
+@media (max-width: 600px) {
+  :root { --ifm-h1-font-size: 2rem; --ifm-h2-font-size: 1.45rem; }
+  .fb-sim { padding: 0.9rem; }
+}
+
+/* =========================================================================
+   Landing page (standalone site only)
+   ========================================================================= */
+.fb-home {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 1.25rem 5rem;
+}
+
+.fb-hero {
+  padding: 5rem 0 3.5rem;
+  text-align: center;
+  border-bottom: 1px solid var(--fb-border);
+}
+.fb-hero__title {
+  font-size: clamp(2.4rem, 6vw, 3.8rem);
+  letter-spacing: -0.03em;
+  margin: 0 0 1rem;
+  line-height: 1.1;
+}
+.fb-hero__tagline {
+  font-size: clamp(1.05rem, 2.4vw, 1.35rem);
+  color: var(--fb-blue);
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
+}
+.fb-hero__sub {
+  max-width: 60ch;
+  margin: 0 auto 2.25rem;
+  color: var(--fb-text-dim);
+  font-size: 1.02rem;
+  line-height: 1.75;
+}
+.fb-hero__cta {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 1.75rem;
+}
+.fb-hero__cta .fb-btn {
+  text-decoration: none !important;
+  padding: 0.65rem 1.35rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.fb-hero__meta {
+  font-size: 0.85rem;
+  color: var(--fb-text-dim);
+  margin: 0;
+  font-family: var(--fb-font-mono);
+}
+
+.fb-home__section { padding: 3rem 0 0; }
+.fb-home__section > h2 {
+  font-size: 1.5rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.25rem;
+}
+
+/* Non-clickable variant of the card, for descriptive content */
+.fb-card--static:hover { border-color: var(--fb-border); transform: none; }
+.fb-card--static { cursor: default; }
+.fb-card code {
+  font-size: 0.85em;
+  background: var(--fb-surface-2);
+}
+
+@media (max-width: 600px) {
+  .fb-hero { padding: 3rem 0 2.5rem; }
+  .fb-hero__cta { flex-direction: column; }
+}

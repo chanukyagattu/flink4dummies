@@ -1,0 +1,278 @@
+---
+title: Deployment
+sidebar_label: Deployment
+description: Running Flink on Kubernetes in application mode, with high availability, and the configuration that separates a demo from production.
+---
+
+# Deployment
+
+<PageMeta level="advanced" time="10 min" prereq={[['Performance', '/docs/flink/scale/performance']]} />
+
+<Objectives>
+
+- Choose a deployment mode and justify it
+- Write a production `FlinkDeployment` with HA, checkpointing and sane restarts
+- Name the six settings that are non-negotiable in production
+
+</Objectives>
+
+## Application mode on Kubernetes
+
+For production in 2026 this is the answer unless you have a specific reason
+otherwise.
+
+```mermaid
+flowchart TB
+    OP[Flink Kubernetes Operator] -->|watches FlinkDeployment CRs| K8S[Kubernetes API]
+    OP --> JM["JobManager pod<br/>(runs your main())"]
+    JM --> TM1[TaskManager pod 1]
+    JM --> TM2[TaskManager pod 2]
+    JM --> TM3[TaskManager pod 3]
+    JM -.->|leader election + job metadata| CM[(ConfigMaps<br/>HA store)]
+    TM1 -.-> S3[(S3 checkpoints)]
+    TM2 -.-> S3
+    TM3 -.-> S3
+```
+
+One job, one cluster. When the job dies, its cluster dies with it. Nothing else is
+affected, resource accounting is per job, and the blast radius of any change is one
+pipeline.
+
+| Mode | Isolation | Startup | Use for |
+| --- | --- | --- | --- |
+| **Application** | One cluster per job | Slower | **Production** |
+| **Session** | Shared cluster | Fast | Development, ad-hoc SQL, short interactive jobs |
+
+## A production FlinkDeployment
+
+```yaml
+apiVersion: flink.apache.org/v1beta1
+kind: FlinkDeployment
+metadata:
+  name: orders-pipeline
+spec:
+  image: my-registry/orders-pipeline:1.4.2   # pin a digest in real life
+  flinkVersion: v2_3
+
+  flinkConfiguration:
+    # ── High availability: non-negotiable ─────────────────────────────
+    high-availability.type: kubernetes
+    high-availability.storageDir: s3://bucket/ha
+
+    # ── Checkpointing ─────────────────────────────────────────────────
+    execution.checkpointing.interval: 60s
+    execution.checkpointing.min-pause: 30s
+    execution.checkpointing.timeout: 10min
+    execution.checkpointing.max-concurrent-checkpoints: "1"
+    execution.checkpointing.tolerable-failed-checkpoints: "3"
+    execution.checkpointing.externalized-checkpoint-retention: RETAIN_ON_CANCELLATION
+    execution.checkpointing.unaligned.enabled: "true"
+    execution.checkpointing.aligned-checkpoint-timeout: 30s
+    state.checkpoints.dir: s3://bucket/checkpoints
+    state.savepoints.dir: s3://bucket/savepoints
+    state.checkpoints.num-retained: "3"
+
+    # ── State backend ─────────────────────────────────────────────────
+    state.backend.type: rocksdb
+    state.backend.incremental: "true"
+    state.backend.local-recovery: "true"
+    state.backend.rocksdb.localdir: /mnt/nvme/rocksdb
+    state.backend.rocksdb.timer-service.factory: rocksdb
+    taskmanager.memory.managed.fraction: "0.5"
+
+    # ── Restarts: back off, do not hammer ─────────────────────────────
+    restart-strategy.type: exponential-delay
+    restart-strategy.exponential-delay.initial-backoff: 10s
+    restart-strategy.exponential-delay.max-backoff: 2min
+    restart-strategy.exponential-delay.reset-backoff-threshold: 10min
+
+    # ── Metrics ───────────────────────────────────────────────────────
+    metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+    metrics.reporter.prom.port: "9249"
+
+  serviceAccount: flink
+  jobManager:
+    resource: {memory: "2048m", cpu: 1}
+    replicas: 1
+  taskManager:
+    resource: {memory: "8192m", cpu: 4}
+
+  job:
+    jarURI: local:///opt/flink/usrlib/orders-pipeline.jar
+    parallelism: 12
+    upgradeMode: savepoint        # ← the operator takes a savepoint on every upgrade
+    state: running
+```
+
+<Callout type="key">
+
+`upgradeMode: savepoint` is what makes `kubectl apply` of a new image a **stateful
+upgrade** rather than a state-losing restart. The operator stops the job with a
+savepoint, deploys the new image, and restores from it.
+
+The alternatives: `stateless` (discards state — correct only for genuinely stateless
+jobs) and `last-state` (restores from the last checkpoint without taking a savepoint
+— faster, but it cannot roll back cleanly).
+
+</Callout>
+
+## The six non-negotiables
+
+| # | Setting | Without it |
+| --- | --- | --- |
+| 1 | `high-availability.type: kubernetes` | The JobManager is a single point of failure for the whole job |
+| 2 | Checkpointing enabled, to durable storage | State is lost on every restart, silently |
+| 3 | `RETAIN_ON_CANCELLATION` | Cancelling the job deletes your only restore point |
+| 4 | `uid()` on every stateful operator | You cannot upgrade without losing state |
+| 5 | Exponential restart backoff | A permanent failure becomes a restart storm |
+| 6 | Metrics exported and alerted on | You find out from a user |
+
+## Resource sizing
+
+Starting points, then measure.
+
+```text
+TaskManager memory:
+  Heap state, small       →  4 GB, managed fraction 0.2
+  RocksDB, moderate state →  8 GB, managed fraction 0.4–0.5
+  RocksDB, large state    →  16 GB+, managed fraction 0.5–0.6, local NVMe
+
+Slots per TaskManager:
+  Start at cores per pod. Fewer slots means more memory per RocksDB
+  instance, which matters for large state.
+
+Parallelism:
+  ≤ Kafka partition count for the source.
+  Downstream: driven by CPU and state size, not by the source.
+```
+
+<Callout type="prod" title="Local disk on Kubernetes">
+
+RocksDB on a network volume (EBS gp2/gp3, NFS) can be several times slower than on
+instance-local NVMe. On EKS, that means an instance type with local storage and:
+
+```yaml
+taskManager:
+  podTemplate:
+    spec:
+      volumes:
+        - name: rocksdb
+          emptyDir: {medium: ""}      # backed by instance storage
+      containers:
+        - name: flink-main-container
+          volumeMounts:
+            - name: rocksdb
+              mountPath: /mnt/nvme
+```
+
+Pair this with `state.backend.local-recovery: true` so a restart on the same node
+reads state from local disk instead of downloading it from S3. Recovery time can go
+from minutes to seconds.
+
+</Callout>
+
+## Configuration hygiene
+
+```yaml
+# secrets from the environment, never from the image or the CR
+env:
+  - name: KAFKA_PASSWORD
+    valueFrom:
+      secretKeyRef: {name: kafka-creds, key: password}
+
+# S3 access via IRSA / workload identity, never static keys
+serviceAccount: flink   # annotated with the IAM role
+```
+
+<Callout type="version">
+
+Flink 2.x uses **`config.yaml`** with standard YAML syntax. The old
+`flink-conf.yaml`, with its flat `key: value` lines and no nesting, is **no longer
+supported**.
+
+```yaml
+# Flink 2.x — config.yaml, standard YAML
+execution:
+  checkpointing:
+    interval: 60s
+```
+
+Flat keys still work in `flinkConfiguration` blocks in the operator CR, which is why
+the example above uses them — but a raw `config.yaml` should use proper nesting.
+
+</Callout>
+
+## Local development
+
+```yaml
+# docker-compose.yml — enough to run and break things locally
+services:
+  jobmanager:
+    image: flink:2.3
+    ports: ["8081:8081"]
+    command: jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        state.backend.type: rocksdb
+        execution.checkpointing.interval: 10s
+        state.checkpoints.dir: file:///tmp/checkpoints
+
+  taskmanager:
+    image: flink:2.3
+    depends_on: [jobmanager]
+    command: taskmanager
+    scale: 2
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 4
+```
+
+Two TaskManagers, so you can kill one and watch recovery — which is the single most
+valuable thing you can do with a local cluster.
+
+The [StreamForge Getting Started guide](https://chanukyagattu.github.io/stream-forge/docs/guides/getting-started) brings up
+Kafka alongside this, which makes the exercise realistic.
+
+<Expert>
+
+**Reactive / adaptive scheduling.** `jobmanager.scheduler: adaptive` lets a job
+adjust parallelism to available slots at runtime. It is the foundation for the
+operator's autoscaler. It changes the "parallelism is fixed at submit time"
+assumption, and it is not appropriate for very large state, where every scale event
+is a full redistribution.
+
+**Pod disruption budgets.** Without one, a node drain can evict several TaskManagers
+at once and cause repeated restarts during routine cluster maintenance. Set a PDB
+allowing at most one TaskManager unavailable.
+
+**JobManager memory.** It is usually small, but not always: checkpoint metadata for
+a job with high parallelism and many key groups is assembled on the JobManager, and
+`UnionListState` is materialised there. A job that OOMs the JobManager on restore is
+almost always one of those two.
+
+**Image immutability.** Pin by digest, not by tag. A `:latest` image plus a pod
+restart is a way to deploy code you did not intend to deploy, at a moment you did
+not choose.
+
+**Job upgrade safety in the operator.** `upgradeMode: savepoint` fails the upgrade
+if the savepoint cannot be taken, which is correct — but it means a job that is
+already unhealthy cannot be upgraded. Have a documented `last-state` fallback for
+that case, and know what you are giving up when you use it.
+
+</Expert>
+
+<Callout type="remember">
+
+Application mode, Kubernetes operator, HA on, checkpoints retained, RocksDB on local
+NVMe with local recovery, exponential backoff, `upgradeMode: savepoint`. Those seven
+choices are most of the difference between a demo and production.
+
+</Callout>
+
+## Next
+
+**[Observability](/docs/flink/production/observability)** — what to measure and what to alert on.

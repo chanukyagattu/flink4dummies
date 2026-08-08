@@ -1,0 +1,253 @@
+---
+title: Reference architectures
+sidebar_label: Reference architectures
+description: Six production streaming designs, each with its time semantics, state profile, failure handling and scaling strategy spelled out.
+---
+
+# Reference architectures
+
+<PageMeta level="advanced" time="16 min" prereq={[['Lambda vs Kappa', '/docs/flink/architecture/lambda-vs-kappa']]} />
+
+Six designs you will actually be asked to build. Each is specified the same way, in the
+order that matters:
+
+```text
+Requirement → Topology → Time semantics → State profile →
+Checkpoint strategy → Sink strategy → Failure handling → Scaling → Observability
+```
+
+The template itself is the transferable part. If you can fill it in for a new
+requirement, you can design a Flink system.
+
+---
+
+## 1. Real-time clickstream analytics
+
+**Requirement:** page and product metrics per minute, visible within 30 seconds,
+reproducible for finance.
+
+```mermaid
+flowchart LR
+    W[Web / mobile SDK] --> G[Ingest gateway<br/>stamps event_time]
+    G --> K[(Kafka: clicks<br/>keyed by user_id)]
+    K --> F["Flink<br/>tumbling 1-min windows"]
+    F --> U[(upsert-kafka: metrics)]
+    F --> L[(Iceberg: raw clicks)]
+    U --> D[Dashboard]
+    L --> A[Ad-hoc SQL]
+```
+
+| Dimension | Decision |
+| --- | --- |
+| **Time** | Event time. Stamped at the **gateway**, not the client — client clocks cannot be trusted. Bound at p99 measured lateness, typically 10–30s. |
+| **State** | Small: one accumulator per (page, window). Tumbling only — resist sliding windows for dashboards. |
+| **Checkpoints** | 60s, aligned with a 30s timeout. State is small, so duration is dominated by nothing in particular. |
+| **Sinks** | `upsert-kafka` keyed on `(window_start, page)` so allowed-lateness re-fires become updates. Plus a raw Iceberg landing table for everything else. |
+| **Failure** | Standard restore. Metrics are idempotent by key, so replay is harmless. |
+| **Scaling** | Source parallelism = partition count. Downstream driven by CPU. Key skew is unlikely on `page`. |
+| **Observe** | Watermark lag, late-record count, consumer lag. |
+
+<Callout type="prod">
+
+Stamping event time at a gateway you control, rather than trusting the client, removes an
+entire class of incident: future-dated timestamps that poison the watermark. Keep the
+client's timestamp as a separate field for analysis, and use the gateway's for
+processing.
+
+</Callout>
+
+---
+
+## 2. Fraud detection
+
+**Requirement:** decide within 200ms of the transaction, using rules the fraud team can
+change without a deploy.
+
+```mermaid
+flowchart LR
+    P[Payments service] --> K[(Kafka: transactions)]
+    R[(Kafka: rules<br/>compacted)] -->|broadcast| F
+    K --> F["Flink<br/>KeyedBroadcastProcessFunction"]
+    F --> A[(Kafka: alerts)]
+    F -->|Async I/O| DB[(Customer profile store)]
+    A --> S[Decision service]
+```
+
+| Dimension | Decision |
+| --- | --- |
+| **Time** | Event time for the pattern logic; a tight bound (1–2s) because latency is the requirement. Processing-time timers only for liveness. |
+| **State** | Per-account rolling window, bounded by the widest rule. **Cap the rule window in validation** — see [Project 4](/docs/flink/projects/dynamic-rules). |
+| **Checkpoints** | Frequent (10–30s), unaligned enabled. State is small; recovery speed matters more than checkpoint cost. |
+| **Sinks** | Idempotent, keyed on `(account, triggering_txn_id)`. **Not** 2PC — it would add checkpoint-interval latency to a 200ms budget. |
+| **Failure** | Replay re-emits alerts; the idempotent key absorbs it. The decision service must be idempotent too. |
+| **Scaling** | Keyed by account — naturally well distributed. Watch for merchant-level skew if you key on merchant instead. |
+| **Observe** | Alert rate, rule count (alert if it drops to zero), p99 end-to-end latency, expired-pattern rate. |
+
+<Callout type="key">
+
+The 200ms requirement is what rules out two-phase commit. With a 2PC sink, results are
+invisible until the covering checkpoint completes — so a 10s checkpoint interval means a
+10s latency floor.
+
+Idempotent output plus at-least-once delivery is the correct choice here, and being able
+to explain *why* is the difference between configuring a system and designing one.
+
+</Callout>
+
+---
+
+## 3. Sessionization
+
+**Requirement:** user sessions with a 30-minute gap, landed in the lakehouse for
+analysis, plus live session counts.
+
+| Dimension | Decision |
+| --- | --- |
+| **Time** | Event time, mandatory. A gap is a real-world quantity; processing time would make session boundaries depend on your lag. |
+| **State** | The largest of these six. One open session per active user; state lives as long as the user is active. Size it from peak concurrent users, not total users. |
+| **Checkpoints** | Long interval (2–5 min), incremental, RocksDB on local NVMe. State size dominates duration. |
+| **Sinks** | Append-only to Iceberg — a session emits once, when it closes. Live counts via a separate short-window aggregation. |
+| **Failure** | Restore is slow because state is large. **Enable local recovery** — this is the single biggest lever on recovery time here. |
+| **Scaling** | Keyed by user; well distributed. Parallelism driven by state size per subtask, not by CPU. |
+| **Observe** | Open session count, state size per subtask, restore duration. |
+
+<Callout type="prod">
+
+Sessionization is where **restore time** becomes your real SLA rather than checkpoint
+time. Measure it explicitly: take a savepoint, restart, and time how long until the first
+checkpoint succeeds after the restore.
+
+If that number is unacceptable, local recovery and a warm node pool will help far more
+than any checkpoint tuning.
+
+</Callout>
+
+---
+
+## 4. CDC to lakehouse
+
+**Requirement:** replicate operational tables into a queryable lake, with deletes and
+updates applied correctly.
+
+```mermaid
+flowchart LR
+    PG[(Postgres)] -->|Debezium| K[(Kafka<br/>debezium-json)]
+    K --> F["Flink SQL<br/>INSERT INTO … SELECT"]
+    F --> I[(Iceberg, upsert enabled)]
+    I --> T[Trino / Athena / Spark]
+    C["Compaction job<br/>scheduled, separate"] -.-> I
+```
+
+| Dimension | Decision |
+| --- | --- |
+| **Time** | Mostly processing time — CDC ordering comes from the log, not from event time. Use event time if you need temporal joins against the CDC stream. |
+| **State** | Small if it is a pure passthrough. `ChangelogNormalize` adds per-key state if the source is an upsert connector — check the plan. |
+| **Checkpoints** | Drives commit frequency to Iceberg. 1–5 minutes: shorter means more small files, longer means staler data. |
+| **Sinks** | Iceberg with `write.upsert.enabled`, committing on checkpoint. Exactly-once via the same 2PC protocol. |
+| **Failure** | Replay re-applies the same upserts — idempotent by primary key. |
+| **Scaling** | Bounded by the source database's change rate. Rarely a Flink-side problem. |
+| **Observe** | Replication lag, commit frequency, **file count per partition**. |
+
+<Callout type="mistake" title="The small-file problem is not optional">
+
+A streaming CDC sink writes files on every checkpoint, per partition, per subtask. At a
+1-minute interval with 8 subtasks and 10 partitions, that is 4,800 files a day. Query
+performance degrades steadily and then sharply.
+
+**Compaction is a separate scheduled job, and every deployment needs one.** Forgetting it
+is the most common reason these pipelines are fine in month one and unusable in month
+six.
+
+</Callout>
+
+---
+
+## 5. Real-time feature generation for ML
+
+**Requirement:** compute features for online inference, with identical logic for training
+and serving.
+
+| Dimension | Decision |
+| --- | --- |
+| **Time** | Event time, strictly. Training/serving skew is *caused* by processing-time features. |
+| **State** | Windowed aggregates per entity. Multiple window sizes — 1 min, 1 hour, 1 day — so the state multiplier matters. |
+| **Checkpoints** | Standard, 60s. |
+| **Sinks** | A low-latency store (Redis, DynamoDB) for serving, plus a lakehouse table for training. **Same job writes both** — that is what eliminates skew. |
+| **Failure** | Idempotent upserts keyed on `(entity, feature, window)`. |
+| **Scaling** | Keyed by entity. Watch for skew on popular entities. |
+| **Observe** | Feature freshness, null rate, distribution drift. |
+
+<Callout type="key">
+
+The entire value of streaming feature generation is that **one job produces both the
+training features and the serving features**.
+
+The moment training features are computed by a separate batch job, you have
+training/serving skew, and your model's offline metrics stop predicting its online
+behaviour. That is a Lambda problem wearing an ML hat.
+
+</Callout>
+
+---
+
+## 6. IoT / device telemetry
+
+**Requirement:** ingest millions of devices, detect anomalies, handle devices that go
+offline for days.
+
+| Dimension | Decision |
+| --- | --- |
+| **Time** | Event time with a **wide** bound (minutes) — devices buffer while offline. Clamp future timestamps aggressively; device clocks are the worst clocks. |
+| **State** | Per-device state with an aggressive TTL. Key cardinality is the dominant cost — millions of devices means millions of state entries. |
+| **Checkpoints** | Long interval, incremental, RocksDB. Move the **timer service to RocksDB** — millions of device timers will OOM the heap otherwise. |
+| **Sinks** | Time-series store for telemetry, alerts topic for anomalies. |
+| **Failure** | Standard. Devices resend on reconnect, so duplicates are common — dedup on `(device, sequence)`. |
+| **Scaling** | Keyed by device; excellent distribution. Bounded by source partitions. |
+| **Observe** | Per-device lateness distribution, active device count, TTL eviction rate. |
+
+<Callout type="prod" title="Two settings specific to this shape">
+
+```yaml
+state.backend.rocksdb.timer-service.factory: rocksdb
+```
+
+Because with one timer per device and millions of devices, the default heap timer service
+is the thing that kills you — not the state.
+
+And a **generous `withIdleness`**, because devices legitimately go quiet for hours. Set it
+longer than your longest normal silence, or you will mark active devices idle and
+classify their catch-up data as late.
+
+</Callout>
+
+---
+
+## The template
+
+Fill this in for any new requirement, in this order. The order matters — later rows
+depend on earlier ones.
+
+```text
+1. REQUIREMENT      What decision does the output drive? How stale can it be?
+2. TIME             Event or processing? What bound? Measured how?
+3. STATE            What is retained, keyed by what, bounded by what?
+4. CHECKPOINTS      Interval driven by state size AND by sink latency needs
+5. SINK             Transactional, idempotent, or append? What is the key?
+6. FAILURE          What does replay do to the sink? Is the logic deterministic?
+7. SCALING          What is the bottleneck: source, CPU, state, or the sink?
+8. OBSERVABILITY    Which of the six alerts, plus what business metric?
+```
+
+<Callout type="remember">
+
+Every architecture above is the same eight decisions with different answers. The two that
+determine the rest are **time semantics** and **state profile** — get those right and the
+others follow; get them wrong and no amount of tuning will save the design.
+
+</Callout>
+
+## Related
+
+- [How Flink really works](/docs/flink/internals/how-flink-really-works) — the mechanisms these designs rely on
+- [Production runbook](/docs/flink/production/runbook) — what to do when one of them misbehaves
+- [StreamForge](/docs/intro) — the platform that packages architecture 4

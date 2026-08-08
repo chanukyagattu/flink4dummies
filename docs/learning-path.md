@@ -1,0 +1,158 @@
+---
+title: Learning path
+sidebar_label: Learning path
+description: A prerequisite graph and four reading routes through the Flink Bible, depending on why you are here.
+---
+
+# Learning path
+
+<PageMeta level="beginner" time="4 min" />
+
+There are four honest reasons to be here, and they want four different routes.
+
+---
+
+## The prerequisite graph
+
+Arrows mean *"you will be confused without this"*. Anything not connected can be
+read in any order.
+
+```mermaid
+flowchart TD
+    E[Events and streams] --> A[Flink architecture]
+    A --> P[Parallelism and subtasks]
+    P --> T[Event time vs processing time]
+    T --> W[Watermarks]
+    W --> WIN[Windows]
+    P --> S[Keyed state]
+    S --> WIN
+    S --> TM[Timers]
+    W --> TM
+    WIN --> J[Joins]
+    S --> J
+    S --> CP[Checkpoints]
+    P --> CP
+    CP --> BAR[Barriers and alignment]
+    CP --> SP[Savepoints]
+    SP --> RS[Rescaling]
+    S --> RS
+    CP --> EO[Exactly-once]
+    P --> BP[Backpressure]
+    BAR --> BP
+    EO --> KF[Kafka and Flink]
+    BP --> PERF[Performance]
+    CP --> RB[Production runbook]
+    BP --> RB
+    RB --> HOW[How Flink really works]
+    EO --> HOW
+    RS --> HOW
+
+    classDef core fill:#3E6E9E22,stroke:#3E6E9E,stroke-width:2px;
+    class T,W,S,CP core;
+```
+
+The four highlighted nodes — **event time**, **watermarks**, **keyed state**,
+**checkpoints** — are the load-bearing walls. Every production problem you will
+ever debug traces back to one of them. If your time is limited, spend it there.
+
+---
+
+## Route 0 — "I learn by building"
+
+Skip ahead and start with the [projects](/docs/flink/projects). Each one is
+runnable against a local Docker stack, and each ends with a **break it on purpose**
+section that reproduces a real production failure deliberately.
+
+Read the concept pages when a project references one. This is slower to start and
+sticks much better.
+
+---
+
+## Route 1 — "I have never done streaming"
+
+Read straight through, Level 0 to Level 11. Roughly 8–10 hours of reading, and
+you should write code between levels rather than after.
+
+The three moments where it gets hard, and where you should slow down:
+
+| Where | Why it is hard | The page that unsticks you |
+| --- | --- | --- |
+| Event time vs processing time | Your intuition about "now" stops working | [Three clocks](/docs/flink/time/three-clocks) |
+| Watermarks | It is a heuristic, not a fact, and that feels wrong | [What is a watermark](/docs/flink/watermarks/what-is-a-watermark) |
+| Checkpoint barriers | Nothing in normal programming works like this | [Barriers and alignment](/docs/flink/fault-tolerance/barriers-and-alignment) |
+
+---
+
+## Route 2 — "I write Flink jobs but I do not really know what they do"
+
+This is the most common starting point, and the most rewarding one. You already
+know the API. What you are missing is the machine underneath it.
+
+1. [Parallelism and subtasks](/docs/flink/basics/parallelism-and-subtasks) — because `setParallelism(8)` is not "use 8 machines"
+2. [Keyed state](/docs/flink/state/keyed-state) — key groups, and why `keyBy` is a boundary and not a function call
+3. [Watermark propagation and idleness](/docs/flink/watermarks/propagation-and-idleness) — the cause of most "my job produces nothing" tickets
+4. [Checkpoints](/docs/flink/fault-tolerance/checkpoints) and [Barriers](/docs/flink/fault-tolerance/barriers-and-alignment)
+5. [Exactly-once](/docs/flink/fault-tolerance/exactly-once) — specifically why it does *not* mean what the name suggests
+6. [Backpressure](/docs/flink/scale/backpressure)
+7. [How Flink really works](/docs/flink/internals/how-flink-really-works)
+
+---
+
+## Route 3 — "Something is broken in production right now"
+
+Go directly to the [**runbook**](/docs/flink/production/runbook). It is organised
+by symptom, not by concept:
+
+- The job is running but emits nothing → watermark stuck
+- Checkpoints take ten minutes → alignment, state size, or storage
+- State grows without bound → missing TTL, unbounded keys, or a join
+- Duplicate rows appeared downstream → sink semantics, not Flink semantics
+- Throughput collapsed → backpressure, find the last busy non-back-pressured operator
+- One subtask is at 100% and the rest are idle → key skew
+- Recovery takes far longer than the checkpoint did → state download, not state size
+
+Each entry links back to the concept page once you have stopped the bleeding.
+
+---
+
+## Route 4 — "I have a senior/staff interview"
+
+Interviewers rarely ask "what is a window". They ask you to reason about
+failure.
+
+1. [Confusions](/docs/flink/reference/confusions) — the fifteen pairs of ideas people mix up
+2. [Cheat sheets](/docs/flink/reference/cheat-sheets) — one page per subsystem
+3. [Exactly-once](/docs/flink/fault-tolerance/exactly-once) — the single most-asked deep question
+4. [Rescaling](/docs/flink/fault-tolerance/rescaling) — the single most-failed deep question
+5. [Interview questions](/docs/flink/reference/interview) — beginner through staff, each with a short answer, a deep answer, the common misconception, and a production example
+
+---
+
+## The twelve levels
+
+```text
+Level 0   What is data, an event, a stream · batch vs streaming · why it is hard
+Level 1   Flink architecture · JobManager · TaskManager · slots · subtasks
+Level 2   Processing time · event time · out-of-order · lateness
+Level 3   Watermarks · generation · propagation · idleness · debugging
+Level 4   Windows · assigners · triggers · incremental aggregation
+Level 5   Keyed state · operator state · broadcast state · TTL · backends
+Level 6   Timers · event-time and processing-time callbacks
+Level 7   Joins · window · interval · temporal · lookup
+Level 8   Checkpoints · barriers · savepoints · exactly-once · rescaling
+Level 9   Backpressure · Kafka integration · async I/O · performance
+Level 10  Deployment · observability · production runbook
+Level 11  Internals · one event's complete journey
+```
+
+<Callout type="prod" title="A suggestion that costs you an evening and saves you a quarter">
+
+Run a local Flink cluster while you read. Docker Compose is enough. Break things
+on purpose: kill a TaskManager mid-window, add a slow sink, set the watermark
+bound to zero. Ten minutes of watching a real job misbehave teaches more than an
+hour of any documentation, including this one.
+
+The [StreamForge Getting Started guide](https://chanukyagattu.github.io/stream-forge/docs/guides/getting-started) gets you a
+local Kafka plus Flink stack in a few commands.
+
+</Callout>
