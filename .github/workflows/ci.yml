@@ -9,12 +9,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with: {fetch-depth: 0}
-      - uses: actions/setup-node@v4
-        with: {node-version: 20, cache: npm}
+      - uses: actions/setup-node@v5
+        with: {node-version: 22, cache: npm}
       - run: npm ci
-      # onBrokenLinks/onBrokenMarkdownLinks are set to 'throw', so a broken
-      # link fails the build rather than shipping.
+      # onBrokenLinks and markdown.hooks.onBrokenMarkdownLinks are set to
+      # 'throw', so a broken link fails the build rather than shipping.
       - run: npm run build
       - run: npm run typecheck

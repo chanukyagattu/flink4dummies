@@ -18,20 +18,26 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # showLastUpdateTime shells out to `git log`, so full history is required
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci
       - run: npm run build
 
       - uses: actions/configure-pages@v5
+        with:
+          # Provision the Pages site on first run instead of failing with
+          # "Get Pages site failed ... Not Found". Requires `pages: write`,
+          # which is granted above.
+          enablement: true
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build
