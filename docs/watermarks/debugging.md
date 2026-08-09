@@ -6,7 +6,7 @@ description: A systematic procedure for "my job runs but produces nothing", plus
 
 # Debugging watermarks
 
-<PageMeta level="advanced" time="8 min" prereq={[['Propagation & idleness', '/docs/flink/watermarks/propagation-and-idleness']]} />
+<PageMeta level="advanced" time="8 min" prereq={[['Propagation & idleness', '/docs/flink/watermarks/propagation-and-idleness']]} docs="docs/ops/monitoring/" />
 
 <Objectives>
 

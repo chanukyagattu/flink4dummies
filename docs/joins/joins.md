@@ -6,7 +6,7 @@ description: Window, interval, temporal, lookup and regular joins — and the on
 
 # Joins
 
-<PageMeta level="advanced" time="14 min" prereq={[['Timers', '/docs/flink/timers']]} />
+<PageMeta level="advanced" time="14 min" prereq={[['Timers', '/docs/flink/timers']]} docs="docs/dev/datastream/operators/joining/" />
 
 <Objectives>
 

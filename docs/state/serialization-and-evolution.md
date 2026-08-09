@@ -6,7 +6,7 @@ description: Why Kryo is quietly costing you half your throughput, and how to ch
 
 # Serialization and schema evolution
 
-<PageMeta level="advanced" time="9 min" prereq={[['State backends', '/docs/flink/state/state-backends']]} />
+<PageMeta level="advanced" time="9 min" prereq={[['State backends', '/docs/flink/state/state-backends']]} docs="docs/dev/datastream/fault-tolerance/serialization/schema_evolution/" />
 
 <Objectives>
 

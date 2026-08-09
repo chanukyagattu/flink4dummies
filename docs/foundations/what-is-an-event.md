@@ -6,7 +6,7 @@ description: The smallest idea in streaming, explained without jargon — and wh
 
 # What is an event?
 
-<PageMeta level="beginner" time="6 min" />
+<PageMeta level="beginner" time="6 min" docs="docs/concepts/overview/" />
 
 <Objectives>
 

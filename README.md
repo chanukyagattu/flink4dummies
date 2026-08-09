@@ -8,7 +8,9 @@ Not an API reference — a textbook. You start at *"what is an event?"* and fini
 able to design, tune, debug, recover and rescale a stateful streaming system that
 handles real money and real traffic.
 
-**60 pages · 4 interactive labs · baselined on Apache Flink 2.3**
+**61 pages · 4 interactive labs · 5 runnable projects · baselined on Apache Flink 2.3**
+
+⚡ **In a hurry?** [Quickstart](https://chanukyagattu.github.io/flink4dummies/docs/flink/quickstart) — a real Flink job running on a real cluster in five minutes, before any theory.
 
 ---
 
@@ -68,6 +70,7 @@ Plus       Table API & SQL · testing · 5 hands-on projects ·
 
 | You are | Start at |
 | --- | --- |
+| Want to run it first | [Quickstart (5 min)](https://chanukyagattu.github.io/flink4dummies/docs/flink/quickstart) |
 | New to streaming | [What is an event?](https://chanukyagattu.github.io/flink4dummies/docs/flink/foundations/what-is-an-event) |
 | Already writing Flink jobs | [Watermarks](https://chanukyagattu.github.io/flink4dummies/docs/flink/watermarks/what-is-a-watermark) |
 | Debugging production right now | [Runbook](https://chanukyagattu.github.io/flink4dummies/docs/flink/production/runbook) |

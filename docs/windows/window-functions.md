@@ -6,7 +6,7 @@ description: reduce, aggregate, process — and why the wrong choice multiplies 
 
 # Window functions
 
-<PageMeta level="intermediate" time="9 min" prereq={[['Window types', '/docs/flink/windows/window-types']]} />
+<PageMeta level="intermediate" time="9 min" prereq={[['Window types', '/docs/flink/windows/window-types']]} docs="docs/dev/datastream/operators/windows/" />
 
 <Objectives>
 

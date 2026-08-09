@@ -6,7 +6,7 @@ description: The twelve metrics that matter, the six alerts every Flink job shou
 
 # Observability
 
-<PageMeta level="advanced" time="9 min" prereq={[['Deployment', '/docs/flink/production/deployment']]} />
+<PageMeta level="advanced" time="9 min" prereq={[['Deployment', '/docs/flink/production/deployment']]} docs="docs/ops/metrics/" />
 
 <Objectives>
 

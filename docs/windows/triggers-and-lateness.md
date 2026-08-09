@@ -6,7 +6,7 @@ description: When a window fires, how to fire it early, and what happens to reco
 
 # Triggers and lateness
 
-<PageMeta level="advanced" time="9 min" prereq={[['Window functions', '/docs/flink/windows/window-functions']]} />
+<PageMeta level="advanced" time="9 min" prereq={[['Window functions', '/docs/flink/windows/window-functions']]} docs="docs/dev/datastream/operators/windows/" />
 
 <Objectives>
 

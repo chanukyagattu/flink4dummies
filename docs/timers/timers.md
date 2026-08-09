@@ -6,7 +6,7 @@ description: Scheduling a callback in the future — the mechanism behind sessio
 
 # Timers
 
-<PageMeta level="intermediate" time="10 min" prereq={[['Serialization & evolution', '/docs/flink/state/serialization-and-evolution']]} />
+<PageMeta level="intermediate" time="10 min" prereq={[['Serialization & evolution', '/docs/flink/state/serialization-and-evolution']]} docs="docs/dev/datastream/operators/process_function/" />
 
 <Objectives>
 

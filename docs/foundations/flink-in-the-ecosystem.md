@@ -6,7 +6,7 @@ description: The layered Flink stack, updated for Flink 2.x — and an honest co
 
 # Flink in the ecosystem
 
-<PageMeta level="beginner" time="8 min" prereq={[['Why this is hard', '/docs/flink/foundations/why-this-is-hard']]} />
+<PageMeta level="beginner" time="8 min" prereq={[['Why this is hard', '/docs/flink/foundations/why-this-is-hard']]} docs="docs/concepts/overview/" />
 
 <Objectives>
 

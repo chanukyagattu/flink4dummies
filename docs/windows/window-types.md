@@ -6,7 +6,7 @@ description: Tumbling, sliding, session, global and count windows — with the s
 
 # Window types
 
-<PageMeta level="intermediate" time="10 min" prereq={[['Why windows?', '/docs/flink/windows/why-windows']]} />
+<PageMeta level="intermediate" time="10 min" prereq={[['Why windows?', '/docs/flink/windows/why-windows']]} docs="docs/dev/datastream/operators/windows/" />
 
 <Objectives>
 

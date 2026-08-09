@@ -6,7 +6,7 @@ description: Batch is a special case of streaming, not the opposite of it — an
 
 # Batch vs streaming
 
-<PageMeta level="beginner" time="7 min" prereq={[['What is a stream?', '/docs/flink/foundations/what-is-a-stream']]} />
+<PageMeta level="beginner" time="7 min" prereq={[['What is a stream?', '/docs/flink/foundations/what-is-a-stream']]} docs="docs/dev/datastream/execution_mode/" />
 
 <Objectives>
 

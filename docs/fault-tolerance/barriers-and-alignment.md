@@ -6,7 +6,7 @@ description: How a marker in the data stream produces a consistent global snapsh
 
 # Barriers and alignment
 
-<PageMeta level="expert" time="12 min" prereq={[['Checkpoints', '/docs/flink/fault-tolerance/checkpoints']]} />
+<PageMeta level="expert" time="12 min" prereq={[['Checkpoints', '/docs/flink/fault-tolerance/checkpoints']]} docs="docs/concepts/stateful-stream-processing/" />
 
 <Objectives>
 

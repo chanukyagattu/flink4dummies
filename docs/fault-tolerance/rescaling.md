@@ -6,7 +6,7 @@ description: Changing the parallelism of a stateful job — how key groups make 
 
 # Rescaling
 
-<PageMeta level="advanced" time="9 min" prereq={[['Exactly-once', '/docs/flink/fault-tolerance/exactly-once']]} />
+<PageMeta level="advanced" time="9 min" prereq={[['Exactly-once', '/docs/flink/fault-tolerance/exactly-once']]} docs="docs/ops/state/savepoints/" />
 
 <Objectives>
 

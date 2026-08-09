@@ -6,7 +6,7 @@ description: The five keyed state types, when to use each, and the key-group ind
 
 # Keyed state
 
-<PageMeta level="intermediate" time="12 min" prereq={[['Why state?', '/docs/flink/state/why-state']]} />
+<PageMeta level="intermediate" time="12 min" prereq={[['Why state?', '/docs/flink/state/why-state']]} docs="docs/dev/datastream/fault-tolerance/state/" />
 
 <Objectives>
 

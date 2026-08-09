@@ -26,18 +26,18 @@ export default function Home(): React.JSX.Element {
             traffic.
           </p>
           <div className="fb-hero__cta">
-            <Link className="fb-btn fb-btn--primary" to="/docs/flink/">
-              Start here →
+            <Link className="fb-btn fb-btn--primary" to="/docs/flink/quickstart">
+              ⚡ Run Flink in 5 minutes →
             </Link>
-            <Link className="fb-btn" to="/docs/flink/learning-path">
-              Pick a reading route
+            <Link className="fb-btn" to="/docs/flink/">
+              Read the guide
             </Link>
-            <Link className="fb-btn" to="/docs/flink/reference/interview">
-              Interview prep
+            <Link className="fb-btn" to="/docs/flink/projects">
+              Five projects
             </Link>
           </div>
           <p className="fb-hero__meta">
-            60 pages · 4 interactive labs · baselined on Apache Flink 2.3
+            61 pages · 4 interactive labs · 5 runnable projects · Apache Flink 2.3
           </p>
         </section>
 
@@ -74,6 +74,14 @@ export default function Home(): React.JSX.Element {
         <section className="fb-home__section">
           <h2>Where to start</h2>
           <div className="fb-grid">
+            <Link className="fb-card" to="/docs/flink/quickstart">
+              <div className="fb-card__level">Want to run it first</div>
+              <div className="fb-card__title">⚡ Quickstart</div>
+              <div className="fb-card__desc">
+                Docker up, a real job running, output on your screen — in five
+                minutes, before any theory.
+              </div>
+            </Link>
             <Link className="fb-card" to="/docs/flink/foundations/what-is-an-event">
               <div className="fb-card__level">Never done streaming</div>
               <div className="fb-card__title">What is an event?</div>

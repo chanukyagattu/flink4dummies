@@ -17,16 +17,35 @@ const LEVELS: Record<Level, {dot: string; label: string}> = {
   expert:       {dot: '⚫', label: 'Expert / Internals'},
 };
 
+/**
+ * The single place the documentation baseline is declared. Every page renders
+ * it, because readers arrive on deep pages from search — not via the index —
+ * and API guidance ages fast enough that an unversioned page is a liability.
+ */
+export const FLINK_VERSION = '2.3';
+const FLINK_DOCS = 'https://nightlies.apache.org/flink/flink-docs-stable/';
+
 export function PageMeta({
   level = 'beginner',
   time,
   prereq = [],
+  docs,
+  version = FLINK_VERSION,
 }: {
   level?: Level;
   time?: string;
   prereq?: Array<[string, string]>;
+  /** Path under the official Flink docs, or a full URL. */
+  docs?: string;
+  version?: string;
 }) {
   const l = LEVELS[level];
+  const docsHref = docs
+    ? docs.startsWith('http')
+      ? docs
+      : FLINK_DOCS + docs.replace(/^\//, '')
+    : undefined;
+
   return (
     <div className="fb-meta">
       <span className={`fb-chip fb-chip--${level}`} aria-label={`Difficulty: ${l.label}`}>
@@ -36,6 +55,21 @@ export function PageMeta({
         <span className="fb-chip" aria-label={`Estimated reading time ${time}`}>
           ⏱ {time}
         </span>
+      )}
+      <span
+        className="fb-chip fb-chip--version"
+        title="Every API and behaviour on this page is written against this Flink version."
+        aria-label={`Written against Apache Flink ${version}`}>
+        Flink {version}
+      </span>
+      {docsHref && (
+        <a
+          className="fb-chip fb-chip--docs"
+          href={docsHref}
+          target="_blank"
+          rel="noopener noreferrer">
+          Official docs ↗
+        </a>
       )}
       {prereq.length > 0 && (
         <span className="fb-meta__prereq">

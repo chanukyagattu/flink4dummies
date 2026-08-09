@@ -6,7 +6,7 @@ description: Four problems — time, state, failure, and scale — that a for-lo
 
 # Why streaming is hard
 
-<PageMeta level="beginner" time="8 min" prereq={[['Batch vs streaming', '/docs/flink/foundations/batch-vs-streaming']]} />
+<PageMeta level="beginner" time="8 min" prereq={[['Batch vs streaming', '/docs/flink/foundations/batch-vs-streaming']]} docs="docs/concepts/stateful-stream-processing/" />
 
 <Objectives>
 

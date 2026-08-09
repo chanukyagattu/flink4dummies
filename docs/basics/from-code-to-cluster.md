@@ -6,7 +6,7 @@ description: StreamGraph → JobGraph → ExecutionGraph, and why nothing runs u
 
 # From code to cluster
 
-<PageMeta level="intermediate" time="8 min" prereq={[['Parallelism and subtasks', '/docs/flink/basics/parallelism-and-subtasks']]} />
+<PageMeta level="intermediate" time="8 min" prereq={[['Parallelism and subtasks', '/docs/flink/basics/parallelism-and-subtasks']]} docs="docs/concepts/flink-architecture/" />
 
 <Objectives>
 

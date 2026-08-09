@@ -6,7 +6,7 @@ description: Why a pipeline runs at the speed of its slowest stage, how to find 
 
 # Backpressure
 
-<PageMeta level="advanced" time="10 min" prereq={[['Rescaling', '/docs/flink/fault-tolerance/rescaling']]} />
+<PageMeta level="advanced" time="10 min" prereq={[['Rescaling', '/docs/flink/fault-tolerance/rescaling']]} docs="docs/ops/monitoring/back_pressure/" />
 
 <Objectives>
 

@@ -6,7 +6,7 @@ description: Getting event time out of your records and into Flink — where to 
 
 # Timestamp assignment
 
-<PageMeta level="intermediate" time="7 min" prereq={[['Out-of-order and late', '/docs/flink/time/out-of-order-and-late']]} />
+<PageMeta level="intermediate" time="7 min" prereq={[['Out-of-order and late', '/docs/flink/time/out-of-order-and-late']]} docs="docs/dev/datastream/event-time/generating_watermarks/" />
 
 <Objectives>
 

@@ -6,7 +6,7 @@ description: Why a synchronous database call in map() destroys throughput, and h
 
 # Async I/O
 
-<PageMeta level="advanced" time="8 min" prereq={[['Kafka & Flink', '/docs/flink/scale/kafka-and-flink']]} />
+<PageMeta level="advanced" time="8 min" prereq={[['Kafka & Flink', '/docs/flink/scale/kafka-and-flink']]} docs="docs/dev/datastream/operators/asyncio/" />
 
 <Objectives>
 

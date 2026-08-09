@@ -6,7 +6,7 @@ description: Partitions, offsets, checkpoints, watermarks — the four things wh
 
 # Kafka and Flink
 
-<PageMeta level="advanced" time="11 min" prereq={[['Backpressure', '/docs/flink/scale/backpressure']]} />
+<PageMeta level="advanced" time="11 min" prereq={[['Backpressure', '/docs/flink/scale/backpressure']]} docs="docs/connectors/datastream/kafka/" />
 
 <Objectives>
 

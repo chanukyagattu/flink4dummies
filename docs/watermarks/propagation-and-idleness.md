@@ -6,7 +6,7 @@ description: The minimum rule, idle sources, watermark alignment — and the rea
 
 # Watermark propagation and idleness
 
-<PageMeta level="advanced" time="11 min" prereq={[['Watermark generation', '/docs/flink/watermarks/generation']]} />
+<PageMeta level="advanced" time="11 min" prereq={[['Watermark generation', '/docs/flink/watermarks/generation']]} docs="docs/dev/datastream/event-time/generating_watermarks/" />
 
 <Objectives>
 

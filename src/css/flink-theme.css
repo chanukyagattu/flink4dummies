@@ -520,3 +520,20 @@ summary:focus-visible,
   .fb-hero { padding: 3rem 0 2.5rem; }
   .fb-hero__cta { flex-direction: column; }
 }
+
+/* Version + official-docs chips in the page header block */
+.fb-chip--version {
+  font-family: var(--fb-font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.01em;
+  color: var(--fb-text-dim);
+  cursor: help;
+}
+.fb-chip--docs {
+  text-decoration: none !important;
+  color: var(--fb-blue) !important;
+  border-color: var(--fb-blue);
+  background: var(--fb-blue-soft);
+  transition: background 0.15s ease;
+}
+.fb-chip--docs:hover { background: var(--fb-surface-3, var(--fb-surface-2)); }

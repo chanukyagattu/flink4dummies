@@ -6,7 +6,7 @@ description: HashMapStateBackend vs EmbeddedRocksDBStateBackend — the trade-of
 
 # State backends
 
-<PageMeta level="advanced" time="9 min" prereq={[['TTL & growth', '/docs/flink/state/ttl-and-growth']]} />
+<PageMeta level="advanced" time="9 min" prereq={[['TTL & growth', '/docs/flink/state/ttl-and-growth']]} docs="docs/ops/state/state_backends/" />
 
 <Objectives>
 

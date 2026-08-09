@@ -6,7 +6,7 @@ description: The WatermarkGenerator interface, periodic vs punctuated emission, 
 
 # Watermark generation
 
-<PageMeta level="advanced" time="8 min" prereq={[['What is a watermark?', '/docs/flink/watermarks/what-is-a-watermark']]} />
+<PageMeta level="advanced" time="8 min" prereq={[['What is a watermark?', '/docs/flink/watermarks/what-is-a-watermark']]} docs="docs/dev/datastream/event-time/generating_watermarks/" />
 
 <Objectives>
 

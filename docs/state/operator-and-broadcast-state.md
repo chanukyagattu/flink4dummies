@@ -6,7 +6,7 @@ description: State that belongs to a subtask rather than a key — source offset
 
 # Operator and broadcast state
 
-<PageMeta level="advanced" time="9 min" prereq={[['Keyed state', '/docs/flink/state/keyed-state']]} />
+<PageMeta level="advanced" time="9 min" prereq={[['Keyed state', '/docs/flink/state/keyed-state']]} docs="docs/dev/datastream/fault-tolerance/broadcast_state/" />
 
 <Objectives>
 

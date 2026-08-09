@@ -6,7 +6,7 @@ description: An unbounded, ordered-ish sequence of events — and the four conse
 
 # What is a stream?
 
-<PageMeta level="beginner" time="7 min" prereq={[['What is an event?', '/docs/flink/foundations/what-is-an-event']]} />
+<PageMeta level="beginner" time="7 min" prereq={[['What is an event?', '/docs/flink/foundations/what-is-an-event']]} docs="docs/concepts/overview/" />
 
 <Objectives>
 

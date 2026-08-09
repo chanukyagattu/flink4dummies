@@ -6,7 +6,7 @@ description: Dynamic tables, changelog streams, retractions — the mental model
 
 # Table API and SQL
 
-<PageMeta level="intermediate" time="12 min" prereq={[['Windows', '/docs/flink/windows/why-windows'], ['State', '/docs/flink/state/why-state']]} />
+<PageMeta level="intermediate" time="12 min" prereq={[['Windows', '/docs/flink/windows/why-windows'], ['State', '/docs/flink/state/why-state']]} docs="docs/dev/table/overview/" />
 
 <Objectives>
 

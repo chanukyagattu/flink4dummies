@@ -6,7 +6,7 @@ description: State is the memory Flink keeps between events — and the reason c
 
 # Why state?
 
-<PageMeta level="intermediate" time="7 min" prereq={[['Triggers & lateness', '/docs/flink/windows/triggers-and-lateness']]} />
+<PageMeta level="intermediate" time="7 min" prereq={[['Triggers & lateness', '/docs/flink/windows/triggers-and-lateness']]} docs="docs/concepts/stateful-stream-processing/" />
 
 <Objectives>
 

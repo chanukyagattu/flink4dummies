@@ -14,7 +14,23 @@ import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
  */
 export const flinkSidebar: SidebarsConfig[string] = [
   'index',
+  'quickstart',
   'learning-path',
+
+  // Deliberately near the top: the runnable material should be discoverable
+  // without scrolling past eleven levels of theory first.
+  {
+    type: 'category',
+    label: '🧪 Hands-on projects',
+    items: [
+      'projects/index',
+      'projects/clickstream',
+      'projects/sessionization',
+      'projects/fraud-detection',
+      'projects/dynamic-rules',
+      'projects/exactly-once-pipeline',
+    ],
+  },
 
   {
     type: 'category',
@@ -141,18 +157,6 @@ export const flinkSidebar: SidebarsConfig[string] = [
     type: 'category',
     label: '🔴 Testing',
     items: ['testing/testing'],
-  },
-  {
-    type: 'category',
-    label: '🧪 Hands-on projects',
-    items: [
-      'projects/index',
-      'projects/clickstream',
-      'projects/sessionization',
-      'projects/fraud-detection',
-      'projects/dynamic-rules',
-      'projects/exactly-once-pipeline',
-    ],
   },
   {
     type: 'category',

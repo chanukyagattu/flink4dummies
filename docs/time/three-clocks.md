@@ -6,7 +6,7 @@ description: Event time, processing time, ingestion time — why they disagree, 
 
 # The three clocks
 
-<PageMeta level="intermediate" time="10 min" prereq={[['Your first job', '/docs/flink/basics/first-job']]} />
+<PageMeta level="intermediate" time="10 min" prereq={[['Your first job', '/docs/flink/basics/first-job']]} docs="docs/concepts/timely-stream-processing/" />
 
 <Objectives>
 

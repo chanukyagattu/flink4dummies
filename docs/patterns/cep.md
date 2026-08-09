@@ -6,7 +6,7 @@ description: Detecting patterns across a sequence of events — the library, the
 
 # Complex event processing
 
-<PageMeta level="advanced" time="12 min" prereq={[['Timers', '/docs/flink/timers'], ['Joins', '/docs/flink/joins']]} />
+<PageMeta level="advanced" time="12 min" prereq={[['Timers', '/docs/flink/timers'], ['Joins', '/docs/flink/joins']]} docs="docs/libs/cep/" />
 
 <Objectives>
 

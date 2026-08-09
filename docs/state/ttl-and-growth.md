@@ -6,7 +6,7 @@ description: Why state grows without bound, how TTL actually works, and the four
 
 # State TTL and growth
 
-<PageMeta level="advanced" time="9 min" prereq={[['Operator & broadcast state', '/docs/flink/state/operator-and-broadcast-state']]} />
+<PageMeta level="advanced" time="9 min" prereq={[['Operator & broadcast state', '/docs/flink/state/operator-and-broadcast-state']]} docs="docs/dev/datastream/fault-tolerance/state/" />
 
 <Objectives>
 

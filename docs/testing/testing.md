@@ -6,7 +6,7 @@ description: Unit tests, operator harnesses, MiniCluster integration tests — a
 
 # Testing Flink jobs
 
-<PageMeta level="advanced" time="12 min" prereq={[['Savepoints', '/docs/flink/fault-tolerance/savepoints']]} />
+<PageMeta level="advanced" time="12 min" prereq={[['Savepoints', '/docs/flink/fault-tolerance/savepoints']]} docs="docs/dev/datastream/testing/" />
 
 <Objectives>
 

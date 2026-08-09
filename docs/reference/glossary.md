@@ -6,7 +6,7 @@ description: Every Flink term, with a one-line definition, why it matters, and w
 
 # Glossary
 
-<PageMeta level="beginner" time="10 min" />
+<PageMeta level="beginner" time="10 min" docs="docs/concepts/glossary/" />
 
 Alphabetical. Each entry: what it is, why it matters, and where to read more.
 

@@ -27,6 +27,19 @@ you will see an explicit version note rather than a silent mix of APIs.
 
 ---
 
+## Want to run something first?
+
+Plenty of people cannot absorb theory until they have seen the thing move. If
+that is you, do not start here.
+
+<CardGrid>
+  <Card to="/docs/flink/quickstart" level="⚡ 5 minutes" title="Quickstart">
+    Docker up, a real job running on a real cluster, output on your screen, and
+    a deliberate crash at the end — before a single paragraph of theory. Then
+    come back here.
+  </Card>
+</CardGrid>
+
 ## How to read this
 
 You do not have to read it in order, but the order is not arbitrary. Each level

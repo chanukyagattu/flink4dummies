@@ -6,7 +6,7 @@ description: Running Flink on Kubernetes in application mode, with high availabi
 
 # Deployment
 
-<PageMeta level="advanced" time="10 min" prereq={[['Performance', '/docs/flink/scale/performance']]} />
+<PageMeta level="advanced" time="10 min" prereq={[['Performance', '/docs/flink/scale/performance']]} docs="docs/deployment/overview/" />
 
 <Objectives>
 

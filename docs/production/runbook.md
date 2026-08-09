@@ -6,7 +6,7 @@ description: Seven real Flink failures, organised by symptom — what to check, 
 
 # Production runbook
 
-<PageMeta level="advanced" time="15 min" prereq={[['Observability', '/docs/flink/production/observability']]} />
+<PageMeta level="advanced" time="15 min" prereq={[['Observability', '/docs/flink/production/observability']]} docs="docs/ops/monitoring/" />
 
 <Objectives>
 

@@ -6,7 +6,7 @@ description: The most misunderstood guarantee in streaming — what Flink actual
 
 # Exactly-once
 
-<PageMeta level="advanced" time="13 min" prereq={[['Savepoints', '/docs/flink/fault-tolerance/savepoints']]} />
+<PageMeta level="advanced" time="13 min" prereq={[['Savepoints', '/docs/flink/fault-tolerance/savepoints']]} docs="docs/concepts/stateful-stream-processing/" />
 
 <Objectives>
 

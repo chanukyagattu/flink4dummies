@@ -78,8 +78,13 @@ const config: Config = {
           label: 'The guide',
         },
         {
-          to: '/docs/flink/learning-path',
-          label: 'Learning path',
+          to: '/docs/flink/quickstart',
+          label: 'Quickstart',
+          position: 'left',
+        },
+        {
+          to: '/docs/flink/projects',
+          label: 'Projects',
           position: 'left',
         },
         {
@@ -105,9 +110,10 @@ const config: Config = {
         {
           title: 'Start',
           items: [
+            {label: 'Quickstart (5 min)', to: '/docs/flink/quickstart'},
             {label: 'Start here', to: '/docs/flink/'},
             {label: 'Learning path', to: '/docs/flink/learning-path'},
-            {label: 'What is an event?', to: '/docs/flink/foundations/what-is-an-event'},
+            {label: 'Hands-on projects', to: '/docs/flink/projects'},
           ],
         },
         {

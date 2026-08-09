@@ -6,7 +6,7 @@ description: The operator-controlled snapshot — how upgrades, migrations and r
 
 # Savepoints
 
-<PageMeta level="advanced" time="9 min" prereq={[['Barriers & alignment', '/docs/flink/fault-tolerance/barriers-and-alignment']]} />
+<PageMeta level="advanced" time="9 min" prereq={[['Barriers & alignment', '/docs/flink/fault-tolerance/barriers-and-alignment']]} docs="docs/ops/state/savepoints/" />
 
 <Objectives>
 

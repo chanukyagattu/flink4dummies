@@ -6,7 +6,7 @@ description: How Flink turns an unbounded stream into finite answers, and the fo
 
 # Why windows?
 
-<PageMeta level="intermediate" time="7 min" prereq={[['Debugging watermarks', '/docs/flink/watermarks/debugging']]} />
+<PageMeta level="intermediate" time="7 min" prereq={[['Debugging watermarks', '/docs/flink/watermarks/debugging']]} docs="docs/dev/datastream/operators/windows/" />
 
 <Objectives>
 

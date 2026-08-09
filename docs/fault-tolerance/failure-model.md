@@ -6,7 +6,7 @@ description: What breaks, how Flink notices, and why "just restart it" does not 
 
 # The failure model
 
-<PageMeta level="advanced" time="8 min" prereq={[['Joins', '/docs/flink/joins']]} />
+<PageMeta level="advanced" time="8 min" prereq={[['Joins', '/docs/flink/joins']]} docs="docs/concepts/stateful-stream-processing/" />
 
 <Objectives>
 

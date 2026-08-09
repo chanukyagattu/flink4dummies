@@ -59,12 +59,16 @@ ever debug traces back to one of them. If your time is limited, spend it there.
 
 ## Route 0 — "I learn by building"
 
-Skip ahead and start with the [projects](/docs/flink/projects). Each one is
-runnable against a local Docker stack, and each ends with a **break it on purpose**
-section that reproduces a real production failure deliberately.
+Start with the [**Quickstart**](/docs/flink/quickstart): five minutes to a
+running cluster, a real job, and output on your screen. It ends by killing a
+TaskManager so you can see what happens without checkpointing.
 
-Read the concept pages when a project references one. This is slower to start and
-sticks much better.
+Then go to the [projects](/docs/flink/projects). Each is runnable against a local
+Docker stack, and each ends with a **break it on purpose** section that
+reproduces a real production failure deliberately.
+
+Read the concept pages when a project references one. Slower to start, sticks
+much better.
 
 ---
 

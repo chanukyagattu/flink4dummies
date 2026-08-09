@@ -6,7 +6,7 @@ description: A complete, runnable Flink 2.x project — word count, then a real 
 
 # Your first Flink job
 
-<PageMeta level="beginner" time="14 min" prereq={[['From code to cluster', '/docs/flink/basics/from-code-to-cluster']]} />
+<PageMeta level="beginner" time="14 min" prereq={[['From code to cluster', '/docs/flink/basics/from-code-to-cluster']]} docs="docs/dev/datastream/overview/" />
 
 <Objectives>
 

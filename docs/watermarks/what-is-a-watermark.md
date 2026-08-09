@@ -6,7 +6,7 @@ description: The single most important idea in Flink — a claim about how far e
 
 # What is a watermark?
 
-<PageMeta level="intermediate" time="12 min" prereq={[['Timestamp assignment', '/docs/flink/time/timestamp-assignment']]} />
+<PageMeta level="intermediate" time="12 min" prereq={[['Timestamp assignment', '/docs/flink/time/timestamp-assignment']]} docs="docs/concepts/timely-stream-processing/" />
 
 <Objectives>
 

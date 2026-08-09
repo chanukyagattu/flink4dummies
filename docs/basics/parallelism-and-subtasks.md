@@ -6,7 +6,7 @@ description: Operators, subtasks, operator chaining, and the four ways records g
 
 # Parallelism and subtasks
 
-<PageMeta level="beginner" time="11 min" prereq={[['Architecture', '/docs/flink/basics/architecture']]} />
+<PageMeta level="beginner" time="11 min" prereq={[['Architecture', '/docs/flink/basics/architecture']]} docs="docs/dev/datastream/execution/parallel/" />
 
 <Objectives>
 

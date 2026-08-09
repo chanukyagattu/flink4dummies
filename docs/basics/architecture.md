@@ -6,7 +6,7 @@ description: JobManager, TaskManager, task slots, and what actually happens betw
 
 # Flink architecture
 
-<PageMeta level="beginner" time="10 min" prereq={[['Flink in the ecosystem', '/docs/flink/foundations/flink-in-the-ecosystem']]} />
+<PageMeta level="beginner" time="10 min" prereq={[['Flink in the ecosystem', '/docs/flink/foundations/flink-in-the-ecosystem']]} docs="docs/concepts/flink-architecture/" />
 
 <Objectives>
 

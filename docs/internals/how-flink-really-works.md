@@ -6,7 +6,7 @@ description: One event's complete journey from Kafka to sink — then sixteen th
 
 # How Flink really works
 
-<PageMeta level="expert" time="20 min" prereq={[['Runbook', '/docs/flink/production/runbook']]} />
+<PageMeta level="expert" time="20 min" prereq={[['Runbook', '/docs/flink/production/runbook']]} docs="docs/concepts/stateful-stream-processing/" />
 
 This is the page that ties the guide together. We take **one event** and follow it
 all the way through, naming every component it touches. Then we ask sixteen "what

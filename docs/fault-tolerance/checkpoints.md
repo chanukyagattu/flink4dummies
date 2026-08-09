@@ -6,7 +6,7 @@ description: The full lifecycle of a checkpoint, the settings that matter, and h
 
 # Checkpoints
 
-<PageMeta level="advanced" time="14 min" prereq={[['Failure model', '/docs/flink/fault-tolerance/failure-model']]} />
+<PageMeta level="advanced" time="14 min" prereq={[['Failure model', '/docs/flink/fault-tolerance/failure-model']]} docs="docs/ops/state/checkpoints/" />
 
 <Objectives>
 

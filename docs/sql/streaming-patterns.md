@@ -6,7 +6,7 @@ description: Top-N, deduplication, CDC pipelines, temporal joins — the queries
 
 # Streaming SQL patterns
 
-<PageMeta level="advanced" time="11 min" prereq={[['Table API & SQL', '/docs/flink/sql/table-api']]} />
+<PageMeta level="advanced" time="11 min" prereq={[['Table API & SQL', '/docs/flink/sql/table-api']]} docs="docs/dev/table/sql/queries/overview/" />
 
 <Objectives>
 
